@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sealed-secrets
+  namespace: nttlogicmonitor
+spec:
+  project: logicmonitor
+  source:
+    chart: collectorset-controller
+    repoURL: https://logicmonitor.github.io/k8s-helm-charts
+    targetRevision: latest
+    helm:
+      releaseName: logicmonitor/argus
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: nttlogicmonitor
