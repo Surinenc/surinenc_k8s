@@ -13,7 +13,7 @@ spec:
     chart: collectorset-controller
     helm:
       valueFiles:
-        - values.yaml
+        - https://raw.githubusercontent.com/Surinenc/surinenc_k8s/main/logicmonitor-helm/logicmonitor-collector-argocd/values.yaml
   project: logicmonitor
   syncPolicy:
     automated: null
