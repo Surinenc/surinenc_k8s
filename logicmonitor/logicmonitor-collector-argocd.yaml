@@ -16,4 +16,6 @@ spec:
         - https://raw.githubusercontent.com/Surinenc/surinenc_k8s/main/logicmonitor-helm/logicmonitor-collector-argocd/values.yaml
   project: logicmonitor
   syncPolicy:
-    automated: null
+    automated:
+      selfHeal: true
+      prune: true
