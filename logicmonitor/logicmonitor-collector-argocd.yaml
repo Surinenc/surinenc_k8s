@@ -8,11 +8,8 @@ spec:
     namespace: nttlogicmonitor
     server: 'https://kubernetes.default.svc'
   source:
-    path: ''
     repoURL: 'https://logicmonitor.github.io/k8s-helm-charts'
     targetRevision: 1.0.0
-    directory:
-      recurse: true
     chart: collectorset-controller
     helm:
       valueFiles:
