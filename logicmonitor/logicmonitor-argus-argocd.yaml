@@ -2,10 +2,11 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: logicmonitor-argus
+  namespace: argocd
 spec:
   destination:
     name: 'logicmonitor-argus'
-    namespace: argocd
+    namespace: nttlogicmonitor
     server: 'https://kubernetes.default.svc'
   source:
     path: ''
