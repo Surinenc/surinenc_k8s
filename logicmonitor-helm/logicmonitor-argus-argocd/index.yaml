@@ -1,9 +1,10 @@
 apiVersion: v2
 entries:
-  name: ntt-argus
-  description: A Helm chart for Kubernetes
-  version: 0.1.0
-  dependencies:
-  - name: argus
-    version: 2.1.0
-    repository: https://logicmonitor.github.io/k8s-helm-charts
+  ntt-argus:
+    name: ntt-argus
+    description: A Helm chart for Kubernetes
+    version: 0.1.0
+    dependencies:
+    - name: argus
+      version: 2.1.0
+      repository: https://logicmonitor.github.io/k8s-helm-charts
