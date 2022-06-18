@@ -9,7 +9,7 @@ spec:
     server: 'https://kubernetes.default.svc'
   source:
     repoURL: 'https://raw.githubusercontent.com/Surinenc/surinenc_k8s/main/logicmonitor-helm/logicmonitor-argus-argocd/'
-    targetRevision: 0.1.0
+    targetRevision: 2.1.0
     chart: ntt-argus
     helm:
       valueFiles:

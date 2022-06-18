@@ -13,4 +13,4 @@ entries:
     name: ntt-argus
     urls:
     - https://logicmonitor.github.io/k8s-helm-charts/argus-2.1.0.tgz
-    version: 0.1.0
+    version: 2.1.0
