@@ -3,7 +3,7 @@ accessKey: "pepito"
 account: nttcom
 clusterName: "k8c00000001003-test-asaez"
 collector:
-  size: "small"
+  size: "medium"
   groupID: 248
 enableRBAC: true
 clusterGroupID: 13984
