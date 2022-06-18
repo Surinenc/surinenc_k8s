@@ -8,8 +8,8 @@ spec:
     namespace: nttlogicmonitor
     server: 'https://kubernetes.default.svc'
   source:
-    repoURL: 'https://logicmonitor.github.io/k8s-helm-charts'
-    targetRevision: 2.1.0
+    repoURL: 'https://raw.githubusercontent.com/Surinenc/surinenc_k8s/main/logicmonitor-helm/logicmonitor-argus-argocd/'
+    targetRevision: 0.1.0
     chart: argus
     helm:
       valueFiles:
