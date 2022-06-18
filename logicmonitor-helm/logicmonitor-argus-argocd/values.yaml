@@ -1,4 +1,10 @@
 accessID: "manolo"
 accessKey: "pepito"
+account: nttcom
 clusterName: "k8c00000001003-test-asaez"
-collector.size: small
+collector:
+  size: small
+  groupID: 248
+enableRBAC: true
+clusterGroupID: 13984
+resourceGroupID: 13985
