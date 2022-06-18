@@ -8,7 +8,7 @@ spec:
     namespace: nttlogicmonitor
     server: 'https://kubernetes.default.svc'
   source:
-    repoURL: 'https://raw.githubusercontent.com/Surinenc/surinenc_k8s/main/logicmonitor-helm/logicmonitor-argus-argocd/'
+    repoURL: 'https://raw.githubusercontent.com/Surinenc/surinenc_k8s/main/logicmonitor-helm/lm-argus/'
     targetRevision: 0.1.0
     chart: argus
     helm:
