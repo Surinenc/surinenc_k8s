@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: 'https://raw.githubusercontent.com/Surinenc/surinenc_k8s/main/logicmonitor-helm/logicmonitor-argus-argocd/'
     targetRevision: 2.1.0
-    chart: ntt-argus
+    chart: argus
     helm:
       valueFiles:
         - values.yaml
