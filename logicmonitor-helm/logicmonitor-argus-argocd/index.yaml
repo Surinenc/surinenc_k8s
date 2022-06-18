@@ -1,14 +1,16 @@
 apiVersion: v1
 entries:
-  argus:
+  ntt-argus:
   - apiVersion: v2
+    created: "2022-06-13T15:41:40.222735+05:30"
     dependencies:
-    - name: kube-state-metrics
+    - condition: kube-state-metrics.enabled
+      name: kube-state-metrics
       repository: https://prometheus-community.github.io/helm-charts
       version: 4.4.0
-    - name: argus
-      repository: https://prometheus-community.github.io/helm-charts
-      version: 2.1.0
     description: Automated Kubernetes monitoring
+    kubeVersion: '>= 1.14.0-0'
     name: ntt-argus
+    urls:
+    - https://logicmonitor.github.io/k8s-helm-charts/argus-2.1.0.tgz
     version: 0.1.0
