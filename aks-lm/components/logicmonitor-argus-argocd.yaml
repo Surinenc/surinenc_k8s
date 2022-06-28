@@ -13,7 +13,7 @@ spec:
     chart: argus
     helm:
       valueFiles:
-        - values.yaml
+        - https://raw.githubusercontent.com/Surinenc/surinenc_k8s/main/aks-lm/values.yaml
   project: logicmonitor
   syncPolicy:
     automated: null
