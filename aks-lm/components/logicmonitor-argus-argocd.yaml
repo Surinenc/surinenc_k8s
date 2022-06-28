@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: logicmonitor-argus
+  namespace: argocd
+spec:
+  destination:
+    namespace: nttlogicmonitor
+    server: 'https://kubernetes.default.svc'
+  source:
+    repoURL: 'https://logicmonitor.github.io/k8s-helm-charts'
+    targetRevision: 2.1.0
+    chart: argus
+    helm:
+      valueFiles:
+        - values.yaml
+  project: logicmonitor
+  syncPolicy:
+    automated: null

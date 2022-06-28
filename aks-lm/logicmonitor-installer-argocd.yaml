@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: logicmonitor-installer
+  namespace: argocd
+spec:
+  project: logicmonitor
+  source:
+    repoURL: 'https://github.com/Surinenc/surinenc_k8s.git'
+    path: aks-lm/components
+    targetRevision: HEAD
+    directory:
+      recurse: true
+      jsonnet: {}
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: nttlogicmonitor
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
