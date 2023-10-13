@@ -15,13 +15,13 @@ metadata:
     name: ntt-customer-apps
 spec:
   # The project the application belongs to.
-  project: ntt-projects
+  project: customer-project01
 
   # Source of the application manifests
   source:
     repoURL: https://github.com/Surinenc/surinenc_k8s.git # Can point to either a Helm chart repo or a git repo.
     targetRevision: HEAD  # For Helm, this refers to the chart version.
-    path: argocd-rbac/ntt-customer-apps  # This has no meaning for Helm charts pulled directly from a Helm repo instead of git.
+    path: argocd-rbac/ntt-customer-apps/app1  # This has no meaning for Helm charts pulled directly from a Helm repo instead of git.
 
   # Destination cluster and namespace to deploy the application
   destination:
