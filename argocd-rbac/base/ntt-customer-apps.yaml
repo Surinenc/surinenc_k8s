@@ -19,9 +19,9 @@ spec:
 
   # Source of the application manifests
   source:
-    repoURL: https://gitlab.ntt.ms/team-system-architecture/demos/asaez-argorbac.git # Can point to either a Helm chart repo or a git repo.
+    repoURL: https://github.com/Surinenc/surinenc_k8s.git # Can point to either a Helm chart repo or a git repo.
     targetRevision: HEAD  # For Helm, this refers to the chart version.
-    path: ntt-customer-apps  # This has no meaning for Helm charts pulled directly from a Helm repo instead of git.
+    path: argocd-rbac/ntt-customer-apps  # This has no meaning for Helm charts pulled directly from a Helm repo instead of git.
 
   # Destination cluster and namespace to deploy the application
   destination:
