@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: customer-project02
+  namespace: argocd
+spec:
+  description: ArgoCD Customer Project01
+  roles:
+  - name: cust-read-only
+    description: Read-only privileges to customer-project02
+    policies:
+    - p, proj:customer-project01:cust-read-only, applications, get, customer-project02/*, allow
+    groups:
+    - cust-read-only
+  - name: cust-admin
+    description: sync privileges to customer-project02
+    policies:
+    - p, proj:customer-project02:cust-admin, applications, get, customer-project02/*, allow
+    - p, proj:customer-project02:cust-admin, applications, sync, customer-project02/*, allow
+    - p, proj:customer-project02:cust-admin, applications, delete, customer-project02/*, allow
+    groups:
+    - cust-admin
+
+  sourceRepos:
+  - '*'
+
+  destinations:
+  - namespace: customer-project02
+    server: https://kubernetes.default.svc
+
+  clusterResourceWhitelist:
+  - group: ''
+    kind: PersistentVolume
+
