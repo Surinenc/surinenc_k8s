@@ -1,27 +1,27 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ntt-customer-apps
+  name: ntt-customer-app02
   # You'll usually want to add your resources to the argocd namespace.
   namespace: argocd
   # Add this finalizer ONLY if you want these to cascade delete.
   finalizers:
     # The default behaviour is foreground cascading deletion
-    - resources-finalizer.argocd.argoproj.io
+    #- resources-finalizer.argocd.argoproj.io
     # Alternatively, you can use background cascading deletion
-    # - resources-finalizer.argocd.argoproj.io/background
+    - resources-finalizer.argocd.argoproj.io/background
   # Add labels to your application object.
   labels:
-    name: ntt-customer-apps
+    name: ntt-customer-app02
 spec:
   # The project the application belongs to.
-  project: customer-project01
+  project: customer-project02
 
   # Source of the application manifests
   source:
     repoURL: https://github.com/Surinenc/surinenc_k8s.git # Can point to either a Helm chart repo or a git repo.
     targetRevision: HEAD  # For Helm, this refers to the chart version.
-    path: argocd-rbac/ntt-customer-apps/app1  # This has no meaning for Helm charts pulled directly from a Helm repo instead of git.
+    path: argocd-rbac/ntt-customer-apps/app2  # This has no meaning for Helm charts pulled directly from a Helm repo instead of git.
 
   # Destination cluster and namespace to deploy the application
   destination:
@@ -30,7 +30,7 @@ spec:
     # or cluster name
     # name: in-cluster
     # The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
-    namespace: argocd
+    namespace: customer-project02
 
   # Sync policy
   syncPolicy:

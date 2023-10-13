@@ -1,33 +1,19 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kuard-deployment
-  labels:
-    app: kuard
+  name: nginx-deployment
 spec:
-  replicas: 3
   selector:
     matchLabels:
-      app: kuard
+      app: nginx
+  replicas: 2 # tells deployment to run 2 pods matching the template
   template:
     metadata:
       labels:
-        app: kuard
+        app: nginx
     spec:
       containers:
-        - image: gcr.io/kuar-demo/kuard-amd64:1
-          name: kuard
-          ports:
-            - containerPort: 8080
-              name: http
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: kuard-service
-spec:
-  selector:
-    app: kuard
-  ports:
-  - port: 80
-    targetPort: 8080
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
