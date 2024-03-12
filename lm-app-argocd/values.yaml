@@ -1,7 +1,4 @@
-global:
-  accessID: "XXXXX"
-  accessKey: "XXXXX"
-  account: "nttcompre"
+
 
 argus:
   clusterName: "k8c00000099999-testecom"
