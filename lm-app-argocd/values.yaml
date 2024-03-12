@@ -1,0 +1,38 @@
+global:
+  accessID: "XXXXX"
+  accessKey: "XXXXX"
+  account: "nttcompre"
+
+argus:
+  clusterName: "k8c00000099999-testecom"
+  enabled: true
+  enableLegacyResourceTree: true
+  collector:
+    size: "medium"
+    lm:
+      groupID: 1
+      scalationChainID: 1
+  rbac:
+    create: true
+  clusterTreeParentID: 1
+  resourceContainerID: 1 
+  selfMonitor:
+    enable: true
+  monitoring:
+    disable:
+      - daemonsets
+      - cronjobs
+      - endpoints
+      - persistentvolumeclaims
+      - jobs
+      - horizontalpodautoscalers
+  filters:
+    - 'type in ("pod", "deploy", "service", "deployment","replicaset","statefulset") && namespace != "nttlogicmonitor"'
+    - '!(type in ("node","pod", "deploy", "service", "deployment","replicaset","statefulset"))'
+
+collectorset-controller:
+  enabled: true
+  probe:
+    enabled: true
+    grpcContainerProbeEnabled: false
+
