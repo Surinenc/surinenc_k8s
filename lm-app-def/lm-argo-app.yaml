@@ -1,8 +1,23 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
+metadata:
+  name: argocd-lm-helm
+  namespace: argocd
+
 spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: "nttlogicmonitor"
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true
+
   sources:
-  - repoURL: 'https://github.com/Surinenc/surinenc_k8s/tree/main/lm-app-argocd'
+  - repoURL: 'https://raw.githubusercontent.com/Surinenc/surinenc_k8s/main/lm-app-argocd/'
     chart: lm-container
     targetRevision: 7.0.0
     helm:
