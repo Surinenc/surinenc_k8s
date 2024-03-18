@@ -1,18 +1,18 @@
 
 
 argus:
-  clusterName: "k8c00000099999-testecom"
+  clusterName: "k8c00000099999-lm-argocd-app"
   enabled: true
   enableLegacyResourceTree: true
   collector:
     size: "medium"
     lm:
-      groupID: 1
+      groupID: 185
       scalationChainID: 1
   rbac:
     create: true
-  clusterTreeParentID: 1
-  resourceContainerID: 1 
+  clusterTreeParentID: 117579
+  resourceContainerID: 117580 
   selfMonitor:
     enable: true
   monitoring:
