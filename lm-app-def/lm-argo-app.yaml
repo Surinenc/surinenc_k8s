@@ -33,7 +33,7 @@ spec:
         # Example Method 2: (Assumptions: namespace=argocd, secret-name=helm-secrets-private-keys, key-name=app, secret.yaml is in the root folder)
         #- secrets+gpg-import-kubernetes://argocd/helm-secrets-private-keys#key.asc?secrets.yaml
         #- secrets_unencrypted.yaml
-        # - values.yaml
+        #- values.yaml
         #- https://raw.githubusercontent.com/Surinenc/surinenc_k8s/main/lm-app-argocd/secrets_unencrypted.yaml
         - https://raw.githubusercontent.com/Surinenc/surinenc_k8s/main/lm-app-argocd/values.yaml        
 
