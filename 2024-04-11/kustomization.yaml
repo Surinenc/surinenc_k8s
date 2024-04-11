@@ -1,0 +1,22 @@
+---
+namespace: nttlogicmonitor
+
+# make sure namespace exists
+resources:
+- namespace.yaml
+
+# custom index.html file
+configMapGenerator:
+- name: collector-controller-cm
+  namespace: nttlogicmonitor
+
+
+helmChartInflationGenerator:
+- chartName: lm-container
+  chartRepoUrl: https://logicmonitor.github.io/helm-charts
+  chartVersion: 7.0.0
+  releaseName: lm-container
+  values: lm-container-configuration-1.2.0.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true

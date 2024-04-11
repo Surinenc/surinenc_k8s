@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nttlogicmonitor
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    name: ''
+    namespace: nttlogicmonitor
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: user/manifests/app-name/env-name/
+    repoURL: 'https://github.com/todaywasawesome/your-repo-here'
+    targetRevision: HEAD
+    plugin: 
+      name: kusto-helm
+  project: default
+  syncPolicy:
+    automated: null
