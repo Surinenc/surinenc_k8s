@@ -1,0 +1,221 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://example.com/example.json",
+  "type": "object",
+  "title": "LM Container Helm chart Values Schema",
+  "description": "LM Container Helm chart Values Schema",
+  "default": {},
+  "examples": [
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "global": {
+      "$id": "#/properties/global",
+      "description": "Global Properties",
+      "type": "object",
+      "properties": {
+        "accessID": {
+          "$id": "#/properties/accessID",
+          "type": "string",
+          "title": "Logicmonitor API Token accessID",
+          "description": "The LogicMonitor API key ID.\nNOTE: Ensure to add surrounding double quotes to avoid special character parsing errors.",
+          "default": "",
+          "examples": [
+            ""
+          ],
+          "$comment": "ui:accessId-ignore tf:optional"
+        },
+        "accessKey": {
+          "$id": "#/properties/accessKey",
+          "type": "string",
+          "title": "Logicmonitor API Token accessKey",
+          "description": "The LogicMonitor API key.\nNOTE: Ensure to add surrounding double quotes to avoid special character parsing errors.",
+          "default": "",
+          "examples": [
+            ""
+          ],
+          "$comment": "ui:accessKey-ignore tf:optional"
+        },
+        "account": {
+          "$id": "#/properties/account",
+          "type": "string",
+          "title": "Logicmonitor account name",
+          "description": "The LogicMonitor account name.nValue should be trimmed from URL \"___.logicmonitor.com\"\nexample: lmqauat.logicmonitor.com then \"lmqauat\" must be a valid value.",
+          "default": "",
+          "examples": [
+            "lmqauat"
+          ],
+          "$comment": "ui:account-ignore tf:optional"
+        },
+        "userDefinedSecret": {
+          "$id": "#/properties/userDefinedSecret",
+          "type": "string",
+          "title": "User provided Secret for LM credentials",
+          "description": "User can provide LM credentials in a Secret instead of plain text. The secret should contain 'accessID', 'accessKey', 'account' along with optional params e.g. 'etcdDiscoveryToken', proxy credentials"
+        }
+      },
+      "additionalProperties": true
+    },
+    "argus": {
+      "$id": "#/properties/argus",
+      "title": "Argus Configurations, check https://artifacthub.io/packages/helm/logicmonitor-helm-charts/argus?modal=values-schema for schema",
+      "description": "Argus Helm Chart Configurations, for detailed schema visit https://artifacthub.io/packages/helm/logicmonitor-helm-charts/argus?modal=values-schema",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable Argus chart installation",
+          "default": true,
+          "$id": "#/properties/argus/properties/enabled"
+        },
+        "clusterName": {
+          "$id": "#/properties/clusterName",
+          "type": "string",
+          "title": "Friendly Cluster Name",
+          "description": "The unique name to give to the cluster's resource group.\nNOTE: You must not change the name once the application is deployed in the cluster. If changed, breaks correlation at multiple places\nexample: Organised Resource group name of Kubernetes resource tree, is generated as \"Kubernetes Cluster: <clusterName>\"",
+          "default": "",
+          "examples": [
+            ""
+          ],
+          "$comment": "ui:clusterName tf:"
+        },
+        "clusterTreeParentID": {
+          "$id": "#/properties/clusterTreeParentID",
+          "type": "integer",
+          "title": "The clusterTreeParentID",
+          "description": "clusterTreeParentID is a parent static resource group ID under which the organised Kubernetes resource tree gets created.\nA static resource group with the mentioned ID should exit beforehand.",
+          "default": 1,
+          "minimum": 1,
+          "examples": [
+            1
+          ],
+          "$comment": "ui:clusterGroupID tf:optional"
+        }
+      },
+      "additionalProperties": true
+    },
+    "collectorset-controller": {
+      "$id": "#/properties/collectorset-controller",
+      "title": "Collectorset Controller Configurations, check https://artifacthub.io/packages/helm/logicmonitor-helm-charts/collectorset-controller?modal=values-schema for schema",
+      "description": "Collectorset Controller Helm Chart Configurations for detailed schema visit https://artifacthub.io/packages/helm/logicmonitor-helm-charts/collectorset-controller?modal=values-schema",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable Collectorset-Controller chart installation",
+          "default": true,
+          "$id": "#/properties/collectorset-controller/properties/enabled"
+        }
+      },
+      "additionalProperties": true
+    },
+    "lmutil": {
+      "$id": "#/properties/lmutil",
+      "additionalProperties": true
+    },
+    "lm-logs": {
+      "$id": "#/properties/lm-logs",
+      "description": "LM Logs Helm Chart Configurations",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable LM Logs chart installation",
+          "default": true,
+          "$id": "#/properties/lm-logs/properties/enabled"
+        }
+      },
+      "additionalProperties": true
+    },
+    "lmotel": {
+      "$id": "#/properties/lmotel",
+      "description": "LMOTEL Helm Chart Configurations",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable LMOTEL Helm Chart installation",
+          "default": false,
+          "$id": "#/properties/lmotel/properties/enabled"
+        }
+      },
+      "additionalProperties": true
+    },
+    "kube-state-metrics": {
+      "$id": "#/properties/kube-state-metrics",
+      "type": "object",
+      "title": "The kube-state-metrics schema",
+      "description": "Describes kube-state-metrics helm chart configurations",
+      "default": {},
+      "examples": [
+        {
+          "enabled": true,
+          "replicas": 1,
+          "collectors": [
+            "daemonsets",
+            "replicasets",
+            "statefulsets",
+            "persistentvolumes"
+          ]
+        }
+      ],
+      "required": [
+      ],
+      "properties": {
+        "enabled": {
+          "$id": "#/properties/kube-state-metrics/properties/enabled",
+          "type": "boolean",
+          "title": "The enabled schema",
+          "description": "Describes the flag to enable kube-state-metrics helm chart installation",
+          "default": false,
+          "examples": [
+            true
+          ]
+        },
+        "replicas": {
+          "$id": "#/properties/kube-state-metrics/properties/replicas",
+          "type": "integer",
+          "title": "The replicas schema",
+          "description": "Describes the number of kube-state-metrics pod replicas",
+          "default": 1,
+          "minimum": 0,
+          "examples": [
+            1
+          ]
+        },
+        "collectors": {
+          "$id": "#/properties/kube-state-metrics/properties/collectors",
+          "type": "array",
+          "title": "The collectors schema",
+          "description": "Describes the list of collector to enable metrics collection by kube-state-metrics",
+          "default": [],
+          "examples": [
+            [
+              "daemonsets",
+              "replicasets"
+            ]
+          ],
+          "additionalItems": true,
+          "uniqueItems": true,
+          "items": {
+            "$id": "#/properties/kube-state-metrics/properties/collectors/items",
+            "anyOf": [
+              {
+                "$id": "#/properties/kube-state-metrics/properties/collectors/items/anyOf/0",
+                "type": "string",
+                "title": "Kube-state-metrics collector name schema",
+                "description": "Describes the kube-state-metrics collector name",
+                "default": "",
+                "examples": [
+                  "daemonsets",
+                  "replicasets"
+                ]
+              }
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}

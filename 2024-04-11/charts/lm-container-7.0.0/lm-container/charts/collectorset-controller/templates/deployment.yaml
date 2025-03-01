@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lmutil.fullname" . }}
+  namespace: {{ template "lmutil.release.namespace" . }}
+  labels:
+    {{- include "collectorset-controller.labels" . | nindent 4}}
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    {{- include "collectorset-controller.annotations" . | nindent 4}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "lmutil.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "collectorset-controller.labels" . | nindent 8 }}
+      annotations:
+        {{- include "collectorset-controller.annotations" . | nindent 8 }}
+    spec:
+      securityContext: {{ include "lmutil.pod-sec-context-nonroot" (list . "lmutil.custom-pod-sec-context-nonroot") | nindent 8 }}
+      serviceAccountName: {{ include "collectorset-controller.serviceAccountName" . }}
+    {{- with .Values.affinity }}
+      affinity:
+      {{ toYaml . | nindent 8 }}
+    {{- end }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
+    {{- end }}
+    {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName | quote }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{ toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+        - name: collectorset-controller
+          securityContext: {{ include "lmutil.container-sec-context-nonroot" (list . "lmutil.custom-container-sec-context-nonroot") | nindent 12 }}
+          image: {{ include "csc-image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | default (.Values.global.image.pullPolicy | default "Always") }}
+          {{ if and ( .Values.probe.enabled) ( .Values.probe.grpcContainerProbeEnabled ) ( semverCompare ">=1.24.0-0" .Capabilities.KubeVersion.Version )}}
+          startupProbe:
+            grpc:
+              port: 50000
+            failureThreshold: {{ .Values.probe.startup.failureThreshold }}
+            periodSeconds: {{ .Values.probe.startup.periodSeconds }}
+          livenessProbe:
+            grpc:
+              port: 50000
+            failureThreshold: {{ .Values.probe.liveness.failureThreshold }}
+            periodSeconds: {{ .Values.probe.liveness.periodSeconds }}
+          readinessProbe:
+            grpc:
+              port: 50000
+            failureThreshold: {{ .Values.probe.readiness.failureThreshold }}
+            periodSeconds: {{ .Values.probe.readiness.periodSeconds }}
+          {{ else if ( .Values.probe.enabled) }}
+          startupProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:50000" ]
+            failureThreshold: {{ .Values.probe.startup.failureThreshold }}
+            periodSeconds: {{ .Values.probe.startup.periodSeconds }}
+          livenessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:50000" ]
+            failureThreshold: {{ .Values.probe.liveness.failureThreshold }}
+            periodSeconds: {{ .Values.probe.liveness.periodSeconds }}
+          readinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:50000" ]
+            failureThreshold: {{ .Values.probe.readiness.failureThreshold }}
+            periodSeconds: {{ .Values.probe.readiness.periodSeconds }}
+          {{ end }}
+
+        {{- with .Values.resources }}
+          resources:
+            {{ toYaml . | nindent 12 }}
+        {{- end}}
+          env:
+        {{ include "lm-credentials-and-proxy-details" . | nindent 12 }}
+          volumeMounts:
+            - name: etc-collectorset-controller
+              mountPath: "/etc/collectorset-controller"
+              readOnly: true
+      volumes:
+        - name: etc-collectorset-controller
+          projected:
+            sources:
+              - configMap:
+                  name: {{ include "lmutil.fullname" . }}
+                  items:
+                    - key: config.yaml
+                      path: config.yaml

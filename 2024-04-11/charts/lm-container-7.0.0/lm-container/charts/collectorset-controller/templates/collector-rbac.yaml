@@ -1,0 +1,154 @@
+{{- if .Values.rbac.create -}}
+---
+apiVersion: {{ template "lmutil.rbac.apiVersion" . }}
+kind: ClusterRole
+metadata:
+  name: {{ include "lmutil.fullname" . }}-collector
+  labels:
+    {{- include "collectorset-controller.labels" . | nindent 4}}
+  annotations:
+    {{- include "collectorset-controller.annotations" . | nindent 4}}
+aggregationRule:
+  clusterRoleSelectors:
+    - matchLabels:
+        logicmonitor.com/aggregate-to-collector: "true"
+rules: [ ] # The control plane automatically fills in the rules
+---
+kind: ClusterRole
+apiVersion: {{ template "lmutil.rbac.apiVersion" . }}
+metadata:
+  name: {{ include "lmutil.fullname" . }}-collector-child
+  labels:
+    logicmonitor.com/aggregate-to-collector: "true"
+    {{- include "collectorset-controller.labels" . | nindent 4}}
+  annotations:
+    {{- include "collectorset-controller.annotations" . | nindent 4}}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - containers
+      - nodes
+      - nodes/proxy
+      - nodes/metrics
+      - componentstatuses
+      - persistentvolumes
+      - persistentvolumeclaims
+      - services
+      - endpoints
+      - pods/log
+      - events
+      - configmaps
+      - secrets
+      - limitranges
+      - resourcequotas
+      - serviceaccounts
+    verbs:
+      - list
+      - get
+  - apiGroups:
+      - "storage.k8s.io"
+    resources:
+      - storageclasses
+    verbs:
+      - list
+      - get
+  - apiGroups:
+      - "batch"
+    resources:
+      - cronjobs
+      - jobs
+    verbs:
+      - list
+      - get
+  - apiGroups:
+      - "apps"
+      - "extensions"
+    resources:
+      - deployments
+      - replicasets
+      - daemonsets
+      - statefulsets
+    verbs:
+      - list
+      - get
+  - apiGroups:
+      - "autoscaling"
+    resources:
+      - horizontalpodautoscalers
+    verbs:
+      - list
+      - get
+  - apiGroups:
+      - "scheduling.k8s.io"
+    resources:
+      - priorityclasses
+    verbs:
+      - list
+      - get
+  - apiGroups:
+      - "networking.k8s.io"
+    resources:
+      - networkpolicies
+      - ingresses
+      - ingressclasses
+    verbs:
+      - list
+      - get
+  - apiGroups:
+      - "rbac.authorization.k8s.io"
+    resources:
+      - clusterroles
+      - clusterrolebindings
+      - roles
+      - rolebindings
+    verbs:
+      - list
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/stats
+    verbs:
+      - get
+  - apiGroups:
+      - "discovery.k8s.io"
+    resources:
+      - endpointslices
+    verbs:
+      - list
+      - get
+  - apiGroups:
+      - "apiextensions.k8s.io"
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - list
+      - get
+  - nonResourceURLs:
+      - /
+      - /healthz
+      - /healthz/*
+      - /metrics
+      - /proxy
+    verbs:
+      - get
+---
+apiVersion: {{ template "lmutil.rbac.apiVersion" . }}
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "lmutil.fullname" . }}-collector
+  labels:
+      {{- include "collectorset-controller.labels" . | nindent 4}}
+  annotations:
+    {{- include "collectorset-controller.annotations" . | nindent 4}}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "lmutil.fullname" . }}-collector
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "collectorset-controller.serviceAccountName" . }}-collector
+    namespace: {{ template "lmutil.release.namespace" . }}
+{{- end -}}

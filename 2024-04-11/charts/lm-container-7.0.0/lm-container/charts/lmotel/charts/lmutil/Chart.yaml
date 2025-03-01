@@ -1,0 +1,10 @@
+apiVersion: v2
+appVersion: 1.16.0
+description: A Helm chart for Kubernetes
+icon: https://logicmonitor.github.io/helm-charts/lm_logo.png
+maintainers:
+- email: argus@logicmonitor.com
+  name: LogicMonitor
+name: lmutil
+type: library
+version: 0.1.6

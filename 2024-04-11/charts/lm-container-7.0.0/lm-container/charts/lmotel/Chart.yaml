@@ -1,0 +1,15 @@
+apiVersion: v2
+appVersion: v2.0.10
+dependencies:
+- name: lmutil
+  repository: https://logicmonitor.github.io/helm-charts
+  version: 0.1.6
+description: Logicmonitor's distribution of OpenTelemetry Collector
+home: https://logicmonitor.github.io/helm-charts
+icon: https://logicmonitor.github.io/helm-charts/lm_logo.png
+kubeVersion: '>= 1.14.0-0'
+maintainers:
+- email: lmotel@logicmonitor.com
+  name: LogicMonitor
+name: lmotel
+version: 1.9.0

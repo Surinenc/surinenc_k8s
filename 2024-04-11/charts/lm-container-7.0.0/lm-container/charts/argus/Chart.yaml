@@ -1,0 +1,15 @@
+apiVersion: v2
+appVersion: v13.0.0
+dependencies:
+- name: lmutil
+  repository: https://logicmonitor.github.io/helm-charts
+  version: 0.1.9
+description: Automated Kubernetes monitoring
+home: https://logicmonitor.github.io/helm-charts
+icon: https://logicmonitor.github.io/helm-charts/lm_logo.png
+kubeVersion: '>= 1.16.0-0'
+maintainers:
+- email: argus@logicmonitor.com
+  name: LogicMonitor
+name: argus
+version: 9.0.0
