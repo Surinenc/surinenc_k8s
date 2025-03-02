@@ -114,68 +114,48 @@ def diagnosis_agent(state):
     state.root_cause = response.content
     return state
 
-def remediation_agent(state):
-    debug_log(f"\033[93m🟡\033[0m Ejecutando remediation_agent para alerta: {state.alert['type']}")
-    state.remediation_success = mock_api_response("automation", state.alert)["success"]
-    return state
-
-def ticketing_agent(state):
-    debug_log(f"\033[97m⚪\033[0m Creando ticket en ServiceNow para alerta: {state.alert['type']}")
-    state.ticket_id = mock_api_response("servicenow_tickets", state.alert)["ticket_id"]
-    return state
-
-def escalation_agent(state):
-    debug_log(f"\033[1;91m🔴\033[0m Escalando incidente para alerta: {state.alert['type']}")
-    return state
-
-def self_improvement_agent(state):
-    debug_log(f"\033[96m🔷\033[0m Aprendiendo del incidente para alerta: {state.alert['type']}")
-    with open("incident_history.json", "a") as f:
-        json.dump(vars(state), f)
-        f.write("\n")
-    return state
-
-# 📌 Supervisor corregido con flujo completo y paralelismo
 def supervisor_agent(state):
     debug_log(f"🕵️‍♂️ Supervisor procesando alerta: {state.alert['type']}")
 
     monitoring_agent(state)
 
+    # 🔄 Ejecutar los tres agentes antes de diagnosis_agent
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-        future_agents = {
+        futures = [
             executor.submit(incident_history_agent, state),
             executor.submit(knowledge_base_agent, state),
-            executor.submit(runbook_agent, state),
-        }
+            executor.submit(runbook_agent, state)
+        ]
+        concurrent.futures.wait(futures)  # 🔥 Esperar a que terminen
 
-        concurrent.futures.wait(future_agents, timeout=TIMEOUT_SECONDS)
-
-    diagnosis_agent(state)
+    diagnosis_agent(state)  
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-        future_agents = {
+        futures = [
             executor.submit(ticketing_agent, state),
-            executor.submit(remediation_agent, state),
-        }
-        concurrent.futures.wait(future_agents)
+            executor.submit(remediation_agent, state)
+        ]
+        concurrent.futures.wait(futures)
 
     if not state.remediation_success:
         escalation_agent(state)
 
-    ticketing_agent(state)
+    ticketing_agent(state)  
     self_improvement_agent(state)
 
-    return state
+    debug_log(f"✅ Finalizado el procesamiento de alerta: {state.alert['type']}")
 
-workflow = StateGraph(IncidentState)
-workflow.add_node("supervisor", supervisor_agent)
-workflow.set_entry_point("supervisor")
-incident_workflow = workflow.compile()
+# 📌 Ejecutar simulación
+if __name__ == "__main__":
+    workflow = StateGraph(IncidentState)
+    workflow.add_node("supervisor", supervisor_agent)
+    workflow.set_entry_point("supervisor")
+    incident_workflow = workflow.compile()
 
-def run_simulation():
-    mock_alerts = generate_mock_alerts(100)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_PARALLEL_ALERTS) as executor:
-        futures = [executor.submit(lambda: incident_workflow.invoke(IncidentState(alert))) for alert in mock_alerts]
-        concurrent.futures.wait(futures)
+    def run_simulation():
+        mock_alerts = generate_mock_alerts(100)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_PARALLEL_ALERTS) as executor:
+            futures = [executor.submit(lambda: incident_workflow.invoke(IncidentState(alert))) for alert in mock_alerts]
+            concurrent.futures.wait(futures)
 
-run_simulation()
+    run_simulation()
