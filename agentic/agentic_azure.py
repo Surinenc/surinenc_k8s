@@ -16,6 +16,13 @@ from typing import List
 # 🔹 Cargar variables de entorno
 load_dotenv()
 
+# 🔥 Configuración de paralelismo
+MAX_PARALLEL_ALERTS = 5  
+TIMEOUT_SECONDS = 30  # ⏳ Máximo tiempo de espera por agentes paralelos
+
+# 📌 Imprimir configuración al inicio
+print(f"\n🚀 Configuración de ejecución: {MAX_PARALLEL_ALERTS} alertas en paralelo, Timeout: {TIMEOUT_SECONDS}s\n")
+
 # 📌 Función para debug con Thread ID al inicio y bolita de color
 def debug_log(message, color="\033[97m"):
     thread_id = threading.get_ident()
@@ -37,8 +44,13 @@ def generate_mock_alerts(n=100):
 def mock_api_response(endpoint, alert):
     delay = random.uniform(3, 40)
     debug_log(f"⌛ Llamando a {endpoint} con delay de {delay:.2f}s para alerta: {alert['type']}")
-    time.sleep(min(delay, 30))  
-
+    
+    if delay > TIMEOUT_SECONDS:
+        debug_log(f"⚠️ Timeout en {endpoint}, asumiendo sin respuesta.")
+        return None  
+    
+    time.sleep(delay)
+    
     mock_responses = {
         "logicmonitor": {"status": "down" if random.random() > 0.2 else "ok"},
         "servicenow_incidents": {"similar_case": f"Resolved: {alert['type']} issue on {fake.date()}" if random.random() > 0.5 else None},
@@ -123,7 +135,7 @@ def self_improvement_agent(state):
         f.write("\n")
     return state
 
-# 📌 Supervisor
+# 📌 Supervisor corregido con flujo completo y paralelismo
 def supervisor_agent(state):
     debug_log(f"🕵️‍♂️ Supervisor procesando alerta: {state.alert['type']}")
 
@@ -131,20 +143,21 @@ def supervisor_agent(state):
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
         future_agents = {
-            executor.submit(incident_history_agent, state): "history",
-            executor.submit(knowledge_base_agent, state): "kb",
-            executor.submit(runbook_agent, state): "runbook",
+            executor.submit(incident_history_agent, state),
+            executor.submit(knowledge_base_agent, state),
+            executor.submit(runbook_agent, state),
         }
 
-        for future in concurrent.futures.as_completed(future_agents, timeout=30):
-            try:
-                future.result()
-            except concurrent.futures.TimeoutError:
-                debug_log(f"⚠️ Timeout alcanzado para {future_agents[future]}.")
+        concurrent.futures.wait(future_agents, timeout=TIMEOUT_SECONDS)
 
     diagnosis_agent(state)
-    ticketing_agent(state)
-    remediation_agent(state)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        future_agents = {
+            executor.submit(ticketing_agent, state),
+            executor.submit(remediation_agent, state),
+        }
+        concurrent.futures.wait(future_agents)
 
     if not state.remediation_success:
         escalation_agent(state)
@@ -161,7 +174,7 @@ incident_workflow = workflow.compile()
 
 def run_simulation():
     mock_alerts = generate_mock_alerts(100)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_PARALLEL_ALERTS) as executor:
         futures = [executor.submit(lambda: incident_workflow.invoke(IncidentState(alert))) for alert in mock_alerts]
         concurrent.futures.wait(futures)
 
