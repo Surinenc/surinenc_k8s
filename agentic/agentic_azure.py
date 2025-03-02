@@ -3,7 +3,7 @@ import json
 import time
 import random
 import threading  # 🔹 Para ejecutar hilos reales
-import concurrent.futures  # 🔹 Para ejecutar en hilos separados
+import concurrent.futures  # 🔹 Para ejecutar en paralelo
 from tqdm import tqdm
 from faker import Faker
 from dotenv import load_dotenv
@@ -43,7 +43,18 @@ def mock_api_response(endpoint, alert):
     debug_log(f"⌛ Llamando a {endpoint} con delay de {delay:.2f}s para alerta: {alert['type']}")
 
     time.sleep(min(delay, 30))  # ⏳ Simula el delay con timeout máximo de 30s
-    return {"response": f"Datos de {endpoint} para {alert['type']}"}
+    
+    # 🔹 Modificaciones aplicadas: LogicMonitor con 80% de "down"
+    mock_responses = {
+        "logicmonitor": {"status": "down" if random.random() > 0.2 else "ok"},
+        "servicenow_incidents": {"similar_case": f"Resolved: {alert['type']} issue on {fake.date()}" if random.random() > 0.5 else None},
+        "confluence_kb": {"suggestion": f"Check {alert['type']} troubleshooting guide" if random.random() > 0.5 else None},
+        "runbook": {"solution": f"Run script to fix {alert['type']}" if random.random() > 0.8 else None},
+        "automation": {"success": random.random() > 0.2},  # 🔹 80% de éxito
+        "servicenow_tickets": {"ticket_id": fake.uuid4()}
+    }
+    
+    return mock_responses.get(endpoint, {})
 
 # 📌 Estado del Incidente (Cada Hilo Tiene su Propia Instancia)
 class IncidentState:
@@ -67,7 +78,7 @@ def get_azure_chat_model():
         openai_api_key=os.getenv("AZURE_OPENAI_API_KEY"),
     )
 
-# 📌 Agentes (Cada Hilo Usa su Propia Instancia de `IncidentState`)
+# 📌 Agentes
 def monitoring_agent(state):
     debug_log(f"🟢 Ejecutando monitoring_agent para alerta: {state.alert['type']}")
     state.alert['status'] = mock_api_response("logicmonitor", state.alert)
@@ -76,48 +87,84 @@ def monitoring_agent(state):
 def diagnosis_agent(state):
     debug_log(f"🟢 Ejecutando diagnosis_agent para alerta: {state.alert['type']}")
     model = get_azure_chat_model()
-    response = model.invoke([HumanMessage(content=f"Diagnose this alert: {state.alert}")])
+    response = model.invoke([HumanMessage(content=f"Diagnose this alert: {state.alert}, history: {state.history_match}, knowledge base: {state.kb_suggestion}, runbook: {state.runbook_solution}")])
     state.root_cause = response.content
     return state
 
-# 📌 Supervisor ahora recibe `state`
+def incident_history_agent(state):
+    debug_log(f"🟢 Ejecutando incident_history_agent para alerta: {state.alert['type']}")
+    state.history_match = mock_api_response("servicenow_incidents", state.alert)
+    return state
+
+def knowledge_base_agent(state):
+    debug_log(f"🟢 Ejecutando knowledge_base_agent para alerta: {state.alert['type']}")
+    state.kb_suggestion = mock_api_response("confluence_kb", state.alert)
+    return state
+
+def runbook_agent(state):
+    debug_log(f"🟢 Ejecutando runbook_agent para alerta: {state.alert['type']}")
+    solution = mock_api_response("runbook", state.alert)
+    if solution:
+        state.runbook_solution.append(solution)
+    return state
+
+def remediation_agent(state):
+    debug_log(f"🟢 Ejecutando remediation_agent para alerta: {state.alert['type']}")
+    state.remediation_success = random.random() > 0.2  # 🔹 80% de éxito
+    return state
+
+def ticketing_agent(state):
+    debug_log(f"🟢 Creando ticket en ServiceNow para alerta: {state.alert['type']}")
+    state.ticket_id = mock_api_response("servicenow_tickets", state.alert)
+    return state
+
+# 📌 Supervisor con ejecución en paralelo
 def supervisor_agent(state):
-    """Cada hilo tiene su propio `IncidentState`, evitando memoria compartida."""
     debug_log(f"🕵️‍♂️ Supervisor procesando alerta: {state.alert['type']}")
 
     monitoring_agent(state)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        future_agents = {
+            executor.submit(incident_history_agent, state): "history",
+            executor.submit(knowledge_base_agent, state): "kb",
+            executor.submit(runbook_agent, state): "runbook",
+        }
+
+        for future in concurrent.futures.as_completed(future_agents, timeout=30):
+            try:
+                future.result()
+            except concurrent.futures.TimeoutError:
+                debug_log(f"⚠️ Timeout alcanzado para {future_agents[future]}.")
+
     diagnosis_agent(state)
+    ticketing_agent(state)
+    remediation_agent(state)
+    ticketing_agent(state)
 
     return state
 
 # 📌 Crear Workflow de LangGraph y Compilarlo
 workflow = StateGraph(IncidentState)
-workflow.add_node("supervisor", supervisor_agent)  # ✅ LangGraph pasará `state` automáticamente
+workflow.add_node("supervisor", supervisor_agent)
 workflow.set_entry_point("supervisor")
 incident_workflow = workflow.compile()
+
+# 📌 Procesar una Alerta en un Hilo Separado
+def process_alert(alert):
+    thread_local.state = IncidentState(alert)
+    return incident_workflow.invoke(thread_local.state)
 
 # 📌 Ejecutar Simulación con ThreadPoolExecutor (5 en Paralelo)
 def run_simulation():
     mock_alerts = generate_mock_alerts(100)
-    debug_log("\n🚀 Ejecutando 100 simulaciones con Supervisor (5 en paralelo, Threads Reales con Espacio de Memoria Individual)...\n")
+    debug_log("\n🚀 Ejecutando 100 simulaciones con Supervisor...\n")
 
-    metrics_results = []
-    
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         futures = {executor.submit(process_alert, alert): alert for alert in mock_alerts}
-        for future in concurrent.futures.as_completed(futures):
-            metrics_results.append(future.result())
+        concurrent.futures.wait(futures)
 
-    with open("azure_performance_metrics.json", "w") as f:
-        json.dump(metrics_results, f, indent=4)
-
-    debug_log("\n✅ Simulación completada. Métricas guardadas en 'azure_performance_metrics.json'.")
-
-# 📌 Procesar una Alerta en un Hilo Separado (Cada Hilo Usa su Propio `IncidentState`)
-def process_alert(alert):
-    thread_local.state = IncidentState(alert)  # ✅ Cada hilo tiene su propia instancia
-    final_state = incident_workflow.invoke(thread_local.state)  # ✅ Ahora `supervisor_agent` recibe `state`
-    return final_state
+    debug_log("\n✅ Simulación completada.")
 
 # 📌 Iniciar la simulación
 run_simulation()
